@@ -1,4 +1,6 @@
+import binascii
 import datetime
+import logging
 import math
 import struct
 import time
@@ -8,6 +10,8 @@ from typing import Optional
 import serial
 
 from dl24.crc import calc_crc_for_payload
+
+logger = logging.getLogger("dl24.serial")
 
 IS_ON = 0x10
 VOLTAGE = 0x11
@@ -96,26 +100,38 @@ class DL24:
     def close(self):
         self.serial.close()
 
+    def _serial_read(self, length: int):
+        data = self.serial.read(length)
+        if data is None:
+            logger.debug("[read] <none>")
+        else:
+            logger.debug("[read] " + binascii.hexlify(data, " ").decode("ascii"))
+        return data
+
+    def _serial_write(self, data: bytes):
+        logger.debug("[write] " + binascii.hexlify(data, " ").decode("ascii"))
+        self.serial.write(data)
+
     def _read_packet(self):
-        packet_type = self.serial.read(1)
+        packet_type = self._serial_read(1)
         if packet_type == b'\xca':
-            d = self.serial.read(1)
+            d = self._serial_read(1)
             if len(d) == 0:
                 return None
             return self._read_value_resp()
         elif packet_type == b'\xff':
-            d = self.serial.read(1)
+            d = self._serial_read(1)
             if len(d) == 0:
                 return None
             return self._read_broadcast()
         elif packet_type == b'\x6f':
             return AckReply()
         else:
-            self.serial.read(self.serial.in_waiting)
+            self._serial_read(self.serial.in_waiting)
             return None
 
     def _read_broadcast(self) -> Optional[BroadcastPacket]:
-        resp = self.serial.read(36 - 2)
+        resp = self._serial_read(36 - 2)
         if len(resp) != 34:
             return None
 
@@ -126,7 +142,7 @@ class DL24:
         return _parse_broadcast(resp)
 
     def _read_value_resp(self) -> ValueReplyPacket:
-        resp = self.serial.read(7 - 2)
+        resp = self._serial_read(7 - 2)
 
         if resp[-2:] != b'\xce\xcf':
             raise DL24Exception("invalid resp")
@@ -151,7 +167,7 @@ class DL24:
 
     def read_value(self, payload):
         frame = bytearray([0xb1, 0xb2, *payload, 0xb6])
-        self.serial.write(frame)
+        self._serial_write(frame)
 
         p = self._wait_for_packet(ValueReplyPacket)
 
@@ -159,7 +175,7 @@ class DL24:
 
     def execute_command(self, command, payload):
         frame = bytearray([0xb1, 0xb2, command, *payload, 0xb6])
-        self.serial.write(frame)
+        self._serial_write(frame)
 
         self._wait_for_packet(AckReply)
 

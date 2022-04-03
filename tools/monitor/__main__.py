@@ -10,15 +10,17 @@ from dl24 import DL24, DL24Exception
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format="[%(asctime)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
     argparser.add_argument('-o', '--output', type=str, metavar="PATH")
     argparser.add_argument('-a', '--append', action='store_true')
+    argparser.add_argument('-d', '--debug', action='store_true')
     argparser.add_argument('--override', action='store_true')
 
     args = argparser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
+                        format="[%(asctime)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     out_path = args.output
 

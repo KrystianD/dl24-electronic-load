@@ -84,11 +84,10 @@ def read(dl24: DL24, out_format: str):
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format="[%(asctime)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-
     argparser = argparse.ArgumentParser()
     argparser.set_defaults(cmd=lambda: None, cmd_args=lambda x: [])
     argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
+    argparser.add_argument('-d', '--debug', action='store_true')
 
     subparsers = argparser.add_subparsers(title='subcommands', description='valid subcommands', help='additional help')
 
@@ -118,6 +117,9 @@ def main():
     sparser.add_argument("-f", "--format", choices=["text", "json"], default="text")
 
     args = argparser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
+                        format="[%(asctime)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     dl24 = DL24(args.path)
 
