@@ -11,7 +11,7 @@ It is recommended to set a virtual Python environment up before installing packa
 virtualenv env
 source env/bin/activate
 
-pip install -r requirements.txt
+pip install -U git+https://github.com/KrystianD/dl24-electronic-load
 ```
 
 ## DL24 management
