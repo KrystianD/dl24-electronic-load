@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
         name='dl24',
-        version='1.0',
+        version='1.1',
         description='DL24 connector',
         author='Krystian Dużyński',
         author_email='krystian.duzynski@gmail.com',
