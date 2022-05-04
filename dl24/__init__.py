@@ -32,6 +32,7 @@ RESET_COUNTERS = 0x05
 
 ByteWaitTime_s = 4
 PacketWaitTime_s = 4
+RetriesCount = 4
 
 
 def unpack_uint24(data):
@@ -174,18 +175,34 @@ class DL24:
         return self._wait_for_packet(BroadcastPacket)
 
     def read_value(self, payload):
+        logger.debug(f"reading value {hex(payload[0])}...")
         frame = bytearray([0xb1, 0xb2, *payload, 0xb6])
-        self._serial_write(frame)
 
-        p = self._wait_for_packet(ValueReplyPacket)
+        for retry in range(0, RetriesCount):
+            try:
+                self._serial_write(frame)
+                p = self._wait_for_packet(ValueReplyPacket)
+                return p.data
+            except DL24NoResponseError:
+                logger.debug("retrying command...")
+                pass
 
-        return p.data
+        raise DL24NoResponseError
 
     def execute_command(self, command, payload):
+        logger.debug(f"executing command {hex(command)}...")
         frame = bytearray([0xb1, 0xb2, command, *payload, 0xb6])
-        self._serial_write(frame)
 
-        self._wait_for_packet(AckReply)
+        for retry in range(0, RetriesCount):
+            try:
+                self._serial_write(frame)
+                self._wait_for_packet(AckReply)
+                return
+            except DL24NoResponseError:
+                logger.debug("retrying command...")
+                pass
+
+        raise DL24NoResponseError
 
     def get_is_on(self) -> bool:
         pa = self.read_value([IS_ON, 0, 0])
