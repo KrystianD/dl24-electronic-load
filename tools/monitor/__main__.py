@@ -50,8 +50,8 @@ def main():
             voltage = dl24.get_voltage()
             current = dl24.get_current()
             temp = dl24.get_temp()
-            charge = dl24.get_energy()
-            energy = dl24.get_charge()
+            energy = dl24.get_energy()
+            charge = dl24.get_charge()
             on_time = dl24.get_time()
 
             days = on_time.days

@@ -195,11 +195,11 @@ class DL24:
         return unpack_uint24(pa) / 1000
 
     def get_energy(self) -> float:
-        pa = self.read_value([CAP_AH, 0, 0])
+        pa = self.read_value([CAP_WH, 0, 0])
         return unpack_uint24(pa) / 1000
 
     def get_charge(self) -> float:
-        pa = self.read_value([CAP_WH, 0, 0])
+        pa = self.read_value([CAP_AH, 0, 0])
         return unpack_uint24(pa) / 1000
 
     def get_time(self) -> datetime.timedelta:
