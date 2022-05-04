@@ -95,6 +95,11 @@ class DL24Error(Exception):
     pass
 
 
+class DL24NoResponseError(DL24Error):
+    def __init__(self):
+        super().__init__("no response")
+
+
 class DL24:
     def __init__(self, port: str):
         self.serial = serial.Serial(port=port, timeout=ByteWaitTime_s,
@@ -159,7 +164,7 @@ class DL24:
         while not isinstance(p, packet_type) or p is None:
             p = self._read_packet()
             if time.time() - s > PacketWaitTime_s:
-                raise DL24Error("no response")
+                raise DL24NoResponseError()
 
         if not isinstance(p, packet_type):
             raise DL24Error("invalid packet")
