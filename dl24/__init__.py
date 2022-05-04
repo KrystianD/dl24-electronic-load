@@ -30,6 +30,9 @@ SETVCUT = 0x03
 SETTMR = 0x04
 RESET_COUNTERS = 0x05
 
+ByteWaitTime_s = 4
+PacketWaitTime_s = 4
+
 
 def unpack_uint24(data):
     return struct.unpack(">I", b'\x00' + data)[0]
@@ -94,7 +97,7 @@ class DL24Error(Exception):
 
 class DL24:
     def __init__(self, port: str):
-        self.serial = serial.Serial(port=port, timeout=4,
+        self.serial = serial.Serial(port=port, timeout=ByteWaitTime_s,
                                     baudrate=9600, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
 
     def close(self):
@@ -155,7 +158,7 @@ class DL24:
         s = time.time()
         while not isinstance(p, packet_type) or p is None:
             p = self._read_packet()
-            if time.time() - s > 4:
+            if time.time() - s > PacketWaitTime_s:
                 raise DL24Error("no response")
 
         if not isinstance(p, packet_type):
