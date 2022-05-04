@@ -131,4 +131,5 @@ def main():
     args.cmd(dl24, *args.cmd_args(args))
 
 
-main()
+if __name__ == "__main__":
+    main()
