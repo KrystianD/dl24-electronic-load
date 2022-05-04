@@ -10,6 +10,6 @@ function build_tool {
   chown $FIXUID:$FIXUID /dist/$2.exe
 }
 
-build_tool tools/manage/__main__.py dl24_manage
-build_tool tools/monitor/__main__.py dl24_monitor
-build_tool tools/plotter/__main__.py dl24_plotter
+build_tool dl24/tools/manage/__main__.py dl24_manage
+build_tool dl24/tools/monitor/__main__.py dl24_monitor
+build_tool dl24/tools/plotter/__main__.py dl24_plotter
