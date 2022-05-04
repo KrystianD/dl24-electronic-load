@@ -58,16 +58,21 @@ def read(dl24: DL24, out_format: str):
     timer = dl24.get_timer()
 
     if out_format == "text":
-        print("enabled", is_on)
-        print("voltage", voltage)
-        print("current", current)
-        print("energy", energy)
-        print("charge", charge)
-        print("time", time)
-        print("temperature", temp)
-        print("current_limit", current_limit)
-        print("voltage_cutoff", voltage_cutoff)
-        print("timer", timer)
+        def format_value(name, value, unit):
+            value_str = f"{value}"
+            value_str += f" {unit or '': <3s}"
+            return f"{name: >20s}: {value_str: >12s}"
+
+        print(format_value("enabled", "yes" if is_on else "no", None))
+        print(format_value("voltage", voltage, "V"))
+        print(format_value("current", current, "A"))
+        print(format_value("energy", energy, "Wh"))
+        print(format_value("charge", charge, "Ah"))
+        print(format_value("time", time, None))
+        print(format_value("temperature", temp, "°C"))
+        print(format_value("current_limit", current_limit, "A"))
+        print(format_value("voltage_cutoff", voltage_cutoff, "V"))
+        print(format_value("timer", timer, None))
     elif out_format == "json":
         print(json.dumps({
             "enabled": is_on,
