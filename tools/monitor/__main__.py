@@ -6,7 +6,7 @@ import datetime
 import argparse
 import time
 
-from dl24 import DL24, DL24Exception
+from dl24 import DL24, DL24Error
 
 
 def main():
@@ -82,7 +82,7 @@ def main():
                 csvfile.flush()
 
             time.sleep(1)
-        except DL24Exception:
+        except DL24Error:
             pass
 
 

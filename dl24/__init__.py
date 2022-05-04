@@ -88,7 +88,7 @@ def _parse_broadcast(data: bytes) -> BroadcastPacket:
     )
 
 
-class DL24Exception(Exception):
+class DL24Error(Exception):
     pass
 
 
@@ -145,7 +145,7 @@ class DL24:
         resp = self._serial_read(7 - 2)
 
         if resp[-2:] != b'\xce\xcf':
-            raise DL24Exception("invalid resp")
+            raise DL24Error("invalid resp")
 
         return ValueReplyPacket(data=resp[:-2])
 
@@ -156,10 +156,10 @@ class DL24:
         while not isinstance(p, packet_type) or p is None:
             p = self._read_packet()
             if time.time() - s > 4:
-                raise DL24Exception("no response")
+                raise DL24Error("no response")
 
         if not isinstance(p, packet_type):
-            raise DL24Exception("invalid packet")
+            raise DL24Error("invalid packet")
         return p
 
     def wait_for_broadcast(self):
@@ -243,5 +243,5 @@ class DL24:
 
 __all__ = [
     "DL24",
-    "DL24Exception",
+    "DL24Error",
 ]
