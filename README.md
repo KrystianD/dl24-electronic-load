@@ -22,12 +22,12 @@ pip install -U git+https://github.com/KrystianD/dl24-electronic-load
 
 ```shell
 # Read settings and measurements
-python -m tools.manage -p /dev/ttyUSB0 read
+dl24-manage -p /dev/ttyUSB0 read
 
 # Set the parameters up and start
-python -m tools.manage -p /dev/ttyUSB0 set-current 10
-python -m tools.manage -p /dev/ttyUSB0 set-voltage-cutoff 10.7
-python -m tools.manage -p /dev/ttyUSB0 enable
+dl24-manage -p /dev/ttyUSB0 set-current 10
+dl24-manage -p /dev/ttyUSB0 set-voltage-cutoff 10.7
+dl24-manage -p /dev/ttyUSB0 enable
 ```
 
 ### Supported commands
@@ -45,7 +45,7 @@ python -m tools.manage -p /dev/ttyUSB0 enable
 ### Example
 
 ```shell
-$ python -m tools.manage -p /dev/ttyUSB0 read -f json
+$ dl24-manage -p /dev/ttyUSB0 read -f json
 {
   "enabled": true,
   "voltage": 11.809,
@@ -68,17 +68,17 @@ $ python -m tools.manage -p /dev/ttyUSB0 read -f json
 
 ```shell
 # View real time measurements
-python -m tools.monitor -p /dev/ttyUSB0
+dl24-monitor -p /dev/ttyUSB0
 
 # View real time measurements and save to test.csv file
-python -m tools.monitor -p /dev/ttyUSB0 -o test.csv
-python -m tools.monitor -p /dev/ttyUSB0 -o test.csv --append
+dl24-monitor -p /dev/ttyUSB0 -o test.csv
+dl24-monitor -p /dev/ttyUSB0 -o test.csv --append
 ```
 
 ### Example
 
 ```
-$ python -m tools.monitor -p /dev/ttyUSB0
+$ dl24-monitor -p /dev/ttyUSB0
 12.06 V | 10.00 A | 120.67 W |  91.30 Wh |  7.51 Ah | 0d 00:45:05 | 37 °C
 ```
 
