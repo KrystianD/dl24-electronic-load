@@ -47,6 +47,7 @@ def main():
 
     while True:
         try:
+            dl24.wait_for_broadcast()
             voltage = dl24.get_voltage()
             current = dl24.get_current()
             temp = dl24.get_temp()
