@@ -101,16 +101,28 @@ class DL24NoResponseError(DL24Error):
         super().__init__("no response")
 
 
+class DL24SerialError(DL24Error):
+    def __init__(self, e: Exception):
+        super().__init__(f"serial error: {e}")
+
+
 class DL24:
     def __init__(self, port: str):
-        self.serial = serial.Serial(port=port, timeout=ByteWaitTime_s,
-                                    baudrate=9600, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
+        try:
+            self.serial = serial.Serial(port=port, timeout=ByteWaitTime_s,
+                                        baudrate=9600, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
+        except serial.SerialException as e:
+            raise DL24SerialError(e)
 
     def close(self):
         self.serial.close()
 
     def _serial_read(self, length: int):
-        data = self.serial.read(length)
+        try:
+            data = self.serial.read(length)
+        except serial.SerialException as e:
+            raise DL24SerialError(e)
+
         if data is None:
             logger.debug("[read] <none>")
         else:
@@ -119,7 +131,11 @@ class DL24:
 
     def _serial_write(self, data: bytes):
         logger.debug("[write] " + binascii.hexlify(data, " ").decode("ascii"))
-        self.serial.write(data)
+
+        try:
+            self.serial.write(data)
+        except serial.SerialException as e:
+            raise DL24SerialError(e)
 
     def _read_packet(self):
         packet_type = self._serial_read(1)
@@ -269,4 +285,6 @@ class DL24:
 __all__ = [
     "DL24",
     "DL24Error",
+    "DL24SerialError",
+    "DL24NoResponseError",
 ]
