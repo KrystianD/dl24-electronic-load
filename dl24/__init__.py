@@ -30,8 +30,8 @@ SETVCUT = 0x03
 SETTMR = 0x04
 RESET_COUNTERS = 0x05
 
-ByteWaitTime_s = 4
-PacketWaitTime_s = 4
+ByteWaitTime_s = 1
+PacketWaitTime_s = 1
 RetriesCount = 4
 
 
