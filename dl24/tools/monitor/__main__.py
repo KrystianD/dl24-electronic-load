@@ -25,6 +25,7 @@ def main():
     out_path = args.output
 
     csvfile = None
+    wr = None
     if out_path is not None:
         exists = os.path.exists(out_path)
 
@@ -78,7 +79,7 @@ def main():
             s = f"\r\u001b[2K{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C"
             print(s, end='')
 
-            if csvfile is not None:
+            if csvfile is not None and wr is not None:
                 wr.writerow(data)
                 csvfile.flush()
 
