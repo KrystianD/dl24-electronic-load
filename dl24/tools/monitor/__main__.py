@@ -9,6 +9,10 @@ import time
 from dl24 import DL24, DL24Error
 
 
+def print_line(txt: str):
+    print(f"\r\u001b[2K{txt}", end='')
+
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
@@ -76,8 +80,7 @@ def main():
                 time_str,
             ]
 
-            s = f"\r\u001b[2K{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C"
-            print(s, end='')
+            print_line(f"{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C")
 
             if csvfile is not None and wr is not None:
                 wr.writerow(data)
