@@ -82,8 +82,6 @@ def main():
             if csvfile is not None and wr is not None:
                 wr.writerow(data)
                 csvfile.flush()
-
-            time.sleep(1)
         except DL24Error:
             pass
 
