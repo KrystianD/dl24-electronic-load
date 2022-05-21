@@ -48,45 +48,53 @@ def main():
         if is_new:
             wr.writerow(['date', 'voltage', 'current', 'power', 'energy', 'charge', 'temp', 'time_seconds', 'time_str'])
 
-    dl24 = DL24(args.path)
-
     while True:
+        dl24 = None
         try:
-            dl24.wait_for_broadcast()
-            voltage = dl24.get_voltage()
-            current = dl24.get_current()
-            temp = dl24.get_temp()
-            energy = dl24.get_energy()
-            charge = dl24.get_charge()
-            on_time = dl24.get_time()
+            dl24 = DL24(args.path)
 
-            days = on_time.days
-            seconds = on_time.seconds
-            hours = seconds // 3600
-            minutes = (seconds // 60) % 60
-            seconds = seconds % 60
+            while True:
+                dl24.wait_for_broadcast()
+                voltage = dl24.get_voltage()
+                current = dl24.get_current()
+                temp = dl24.get_temp()
+                energy = dl24.get_energy()
+                charge = dl24.get_charge()
+                on_time = dl24.get_time()
 
-            time_sec = int(on_time.total_seconds())
-            time_str = f"{days:01d}d {hours:02d}:{minutes:02d}:{seconds:02d}"
-            data = [
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                f"{voltage:.2f}",
-                f"{current:.2f}",
-                f"{voltage * current:.2f}",
-                f"{energy:.2f}",
-                f"{charge:.2f}",
-                f"{temp:.0f}",
-                f"{time_sec}",
-                time_str,
-            ]
+                days = on_time.days
+                seconds = on_time.seconds
+                hours = seconds // 3600
+                minutes = (seconds // 60) % 60
+                seconds = seconds % 60
 
-            print_line(f"{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C")
+                time_sec = int(on_time.total_seconds())
+                time_str = f"{days:01d}d {hours:02d}:{minutes:02d}:{seconds:02d}"
+                data = [
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    f"{voltage:.2f}",
+                    f"{current:.2f}",
+                    f"{voltage * current:.2f}",
+                    f"{energy:.2f}",
+                    f"{charge:.2f}",
+                    f"{temp:.0f}",
+                    f"{time_sec}",
+                    time_str,
+                ]
 
-            if csvfile is not None and wr is not None:
-                wr.writerow(data)
-                csvfile.flush()
-        except DL24Error:
-            pass
+                print_line(f"{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C")
+
+                if csvfile is not None and wr is not None:
+                    wr.writerow(data)
+                    csvfile.flush()
+        except KeyboardInterrupt:
+            return
+        except DL24Error as e:
+            print_line(f"Serial error: {e}")
+            time.sleep(1)
+        finally:
+            if dl24 is not None:
+                dl24.close()
 
 
 if __name__ == "__main__":
