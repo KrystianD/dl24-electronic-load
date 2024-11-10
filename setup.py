@@ -12,6 +12,7 @@ setup(
             "dl24.tools.manage",
             "dl24.tools.monitor",
             "dl24.tools.plotter",
+            "dl24.transports",
         ],
         install_requires=[
             'pyserial>=3.5',

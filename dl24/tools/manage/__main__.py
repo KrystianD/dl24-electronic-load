@@ -1,40 +1,42 @@
+import asyncio
 import json
 import logging
 import datetime
 import argparse
 
 from dl24 import DL24
+from transports.TransportSerial import TransportSerial
 
 
-def set_current(dl24: DL24, value: float):
+async def set_current(dl24: DL24, value: float):
     print("set_current", value)
-    dl24.set_current(value)
+    await dl24.set_current(value)
 
 
-def set_voltage_cutoff(dl24: DL24, value: float):
+async def set_voltage_cutoff(dl24: DL24, value: float):
     print("set_voltage_cutoff", value)
-    dl24.set_voltage_cutoff(value)
+    await dl24.set_voltage_cutoff(value)
 
 
-def set_timer(dl24: DL24, value: float):
+async def set_timer(dl24: DL24, value: float):
     td = datetime.timedelta(seconds=value)
     print("set_timer", td)
-    dl24.set_timer(td)
+    await dl24.set_timer(td)
 
 
-def enable(dl24: DL24):
+async def enable(dl24: DL24):
     print("enable")
-    dl24.enable()
+    await dl24.enable()
 
 
-def disable(dl24: DL24):
+async def disable(dl24: DL24):
     print("disable")
-    dl24.disable()
+    await dl24.disable()
 
 
-def reset_counters(dl24: DL24):
+async def reset_counters(dl24: DL24):
     print("reset_counters")
-    dl24.reset_counters()
+    await dl24.reset_counters()
 
 
 def timedelta_to_str(x: datetime.timedelta):
@@ -45,17 +47,17 @@ def timedelta_to_str(x: datetime.timedelta):
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def read(dl24: DL24, out_format: str):
-    is_on = dl24.get_is_on()
-    voltage = dl24.get_voltage()
-    current = dl24.get_current()
-    energy = dl24.get_energy()
-    charge = dl24.get_charge()
-    time = dl24.get_time()
-    temp = dl24.get_temp()
-    current_limit = dl24.get_current_limit()
-    voltage_cutoff = dl24.get_voltage_cutoff()
-    timer = dl24.get_timer()
+async def read(dl24: DL24, out_format: str):
+    is_on = await dl24.get_is_on()
+    voltage = await dl24.get_voltage()
+    current = await dl24.get_current()
+    energy = await dl24.get_energy()
+    charge = await dl24.get_charge()
+    time = await dl24.get_time()
+    temp = await dl24.get_temp()
+    current_limit = await dl24.get_current_limit()
+    voltage_cutoff = await dl24.get_voltage_cutoff()
+    timer = await dl24.get_timer()
 
     if out_format == "text":
         def format_value(name, value, unit):
@@ -88,7 +90,7 @@ def read(dl24: DL24, out_format: str):
         }, indent=2))
 
 
-def main():
+async def app():
     argparser = argparse.ArgumentParser()
     argparser.set_defaults(cmd=lambda: None, cmd_args=lambda x: [])
     argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
@@ -126,9 +128,14 @@ def main():
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
                         format="[%(asctime)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
-    dl24 = DL24(args.path)
+    transport = TransportSerial(args.path)
+    dl24 = DL24(transport)
 
-    args.cmd(dl24, *args.cmd_args(args))
+    await args.cmd(dl24, *args.cmd_args(args))
+
+
+def main():
+    asyncio.run(app())
 
 
 if __name__ == "__main__":

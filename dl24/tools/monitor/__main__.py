@@ -1,3 +1,4 @@
+import asyncio
 import os
 import csv
 import sys
@@ -7,13 +8,14 @@ import argparse
 import time
 
 from dl24 import DL24, DL24Error
+from transports.TransportSerial import TransportSerial
 
 
 def print_line(txt: str):
     print(f"\r\u001b[2K{txt}", end='')
 
 
-def main():
+async def app():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
     argparser.add_argument('-o', '--output', type=str, metavar="PATH")
@@ -51,16 +53,17 @@ def main():
     while True:
         dl24 = None
         try:
-            dl24 = DL24(args.path)
+            transport = TransportSerial(args.path)
+            dl24 = DL24(transport)
 
             while True:
-                dl24.wait_for_broadcast()
-                voltage = dl24.get_voltage()
-                current = dl24.get_current()
-                temp = dl24.get_temp()
-                energy = dl24.get_energy()
-                charge = dl24.get_charge()
-                on_time = dl24.get_time()
+                await dl24.wait_for_broadcast()
+                voltage = await dl24.get_voltage()
+                current = await dl24.get_current()
+                temp = await dl24.get_temp()
+                energy = await dl24.get_energy()
+                charge = await dl24.get_charge()
+                on_time = await dl24.get_time()
 
                 days = on_time.days
                 seconds = on_time.seconds
@@ -91,10 +94,14 @@ def main():
             return
         except DL24Error as e:
             print_line(f"Serial error: {e}")
-            time.sleep(1)
+            await asyncio.sleep(1)
         finally:
             if dl24 is not None:
                 dl24.close()
+
+
+def main():
+    asyncio.run(app())
 
 
 if __name__ == "__main__":
