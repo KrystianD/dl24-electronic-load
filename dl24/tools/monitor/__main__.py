@@ -6,9 +6,10 @@ import logging
 import datetime
 import argparse
 import time
+from contextlib import closing
 
 from dl24 import DL24, DL24Error
-from transports.TransportSerial import TransportSerial
+from dl24.transport import connect_to_transport
 
 
 def print_line(txt: str):
@@ -17,7 +18,7 @@ def print_line(txt: str):
 
 async def app():
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
+    argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True, help="serial port path or tcp:<ip>:<port>")
     argparser.add_argument('-o', '--output', type=str, metavar="PATH")
     argparser.add_argument('-a', '--append', action='store_true')
     argparser.add_argument('-d', '--debug', action='store_true')
@@ -53,43 +54,44 @@ async def app():
     while True:
         dl24 = None
         try:
-            transport = TransportSerial(args.path)
-            dl24 = DL24(transport)
+            with closing(await connect_to_transport(args.path)) as transport:
+                dl24 = DL24(transport)
 
-            while True:
-                await dl24.wait_for_broadcast()
-                voltage = await dl24.get_voltage()
-                current = await dl24.get_current()
-                temp = await dl24.get_temp()
-                energy = await dl24.get_energy()
-                charge = await dl24.get_charge()
-                on_time = await dl24.get_time()
+                while True:
+                    await dl24.wait_for_broadcast()
+                    voltage = await dl24.get_voltage()
+                    current = await dl24.get_current()
+                    temp = await dl24.get_temp()
+                    energy = await dl24.get_energy()
+                    charge = await dl24.get_charge()
+                    on_time = await dl24.get_time()
 
-                days = on_time.days
-                seconds = on_time.seconds
-                hours = seconds // 3600
-                minutes = (seconds // 60) % 60
-                seconds = seconds % 60
+                    days = on_time.days
+                    seconds = on_time.seconds
+                    hours = seconds // 3600
+                    minutes = (seconds // 60) % 60
+                    seconds = seconds % 60
 
-                time_sec = int(on_time.total_seconds())
-                time_str = f"{days:01d}d {hours:02d}:{minutes:02d}:{seconds:02d}"
-                data = [
-                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    f"{voltage:.2f}",
-                    f"{current:.2f}",
-                    f"{voltage * current:.2f}",
-                    f"{energy:.2f}",
-                    f"{charge:.2f}",
-                    f"{temp:.0f}",
-                    f"{time_sec}",
-                    time_str,
-                ]
+                    time_sec = int(on_time.total_seconds())
+                    time_str = f"{days:01d}d {hours:02d}:{minutes:02d}:{seconds:02d}"
+                    data = [
+                        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        f"{voltage:.2f}",
+                        f"{current:.2f}",
+                        f"{voltage * current:.2f}",
+                        f"{energy:.2f}",
+                        f"{charge:.2f}",
+                        f"{temp:.0f}",
+                        f"{time_sec}",
+                        time_str,
+                    ]
 
-                print_line(f"{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C")
+                    print_line(
+                        f"{voltage:5.02f} V | {current:5.2f} A | {voltage * current:5.2f} W | {energy:6.2f} Wh | {charge:5.2f} Ah | {time_str} | {temp} °C")
 
-                if csvfile is not None and wr is not None:
-                    wr.writerow(data)
-                    csvfile.flush()
+                    if csvfile is not None and wr is not None:
+                        wr.writerow(data)
+                        csvfile.flush()
         except KeyboardInterrupt:
             return
         except DL24Error as e:

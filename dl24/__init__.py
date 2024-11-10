@@ -101,9 +101,15 @@ class DL24:
         self.transport.close()
 
     async def _serial_read(self, length: int):
-        data = await self.transport.read(length)
+        data = b""
+        while True:
+            part = await self.transport.read(length)
+            if len(part) == 0:
+                break
+            data += part
+            length -= len(part)
 
-        if data is None:
+        if len(data) == 0:
             logger.debug("[read] <none>")
         else:
             logger.debug("[read] " + binascii.hexlify(data, " ").decode("ascii"))

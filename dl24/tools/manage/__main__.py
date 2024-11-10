@@ -5,7 +5,7 @@ import datetime
 import argparse
 
 from dl24 import DL24
-from transports.TransportSerial import TransportSerial
+from dl24.transport import connect_to_transport
 
 
 async def set_current(dl24: DL24, value: float):
@@ -93,7 +93,7 @@ async def read(dl24: DL24, out_format: str):
 async def app():
     argparser = argparse.ArgumentParser()
     argparser.set_defaults(cmd=lambda: None, cmd_args=lambda x: [])
-    argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True)
+    argparser.add_argument('-p', '--path', type=str, metavar="PATH", required=True, help="serial port path or tcp:<ip>:<port>")
     argparser.add_argument('-d', '--debug', action='store_true')
 
     subparsers = argparser.add_subparsers(title='subcommands', description='valid subcommands', help='additional help')
@@ -128,7 +128,7 @@ async def app():
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
                         format="[%(asctime)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
-    transport = TransportSerial(args.path)
+    transport = await connect_to_transport(args.path)
     dl24 = DL24(transport)
 
     await args.cmd(dl24, *args.cmd_args(args))

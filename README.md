@@ -23,6 +23,7 @@ pip install -U git+https://github.com/KrystianD/dl24-electronic-load
 ```shell
 # Read settings and measurements
 dl24-manage -p /dev/ttyUSB0 read
+dl24-manage -p tcp:192.168.1.100:5555 read
 
 # Set the parameters up and start
 dl24-manage -p /dev/ttyUSB0 set-current 10
@@ -69,6 +70,7 @@ $ dl24-manage -p /dev/ttyUSB0 read -f json
 ```shell
 # View real time measurements
 dl24-monitor -p /dev/ttyUSB0
+dl24-monitor -p tcp:192.168.1.100:5555
 
 # View real time measurements and save to test.csv file
 dl24-monitor -p /dev/ttyUSB0 -o test.csv
