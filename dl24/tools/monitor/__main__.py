@@ -97,6 +97,9 @@ async def app():
         except DL24Error as e:
             print_line(f"Serial error: {e}")
             await asyncio.sleep(1)
+        except Exception as e:
+            print_line(f"Unknown error: {e}")
+            await asyncio.sleep(1)
         finally:
             if dl24 is not None:
                 dl24.close()
