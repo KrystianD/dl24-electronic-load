@@ -81,15 +81,15 @@ def _parse_broadcast(data: bytes) -> BroadcastPacket:
         return struct.unpack(format_, b)[0]
 
     return BroadcastPacket(
-            voltage=get_int("B", 6) / 10,
-            current=get_int(">H", 8) / 1000,
-            capacity=get_int(">H", 11) * 10 / 1000,
-            energy=get_int(">H", 15) * 10,
-            temperature=get_int("B", 25),
-            time=datetime.timedelta(
-                    hours=get_int("B", 27),
-                    minutes=get_int("B", 28),
-                    seconds=get_int("B", 29)),
+        voltage=get_int("B", 6) / 10,
+        current=get_int(">H", 8) / 1000,
+        capacity=get_int(">H", 11) * 10 / 1000,
+        energy=get_int(">H", 15) * 10,
+        temperature=get_int("B", 25),
+        time=datetime.timedelta(
+            hours=get_int("B", 27),
+            minutes=get_int("B", 28),
+            seconds=get_int("B", 29)),
     )
 
 
@@ -102,10 +102,8 @@ class DL24:
 
     async def _serial_read(self, length: int):
         data = b""
-        while True:
+        while length > 0:
             part = await self.transport.read(length)
-            if len(part) == 0:
-                break
             data += part
             length -= len(part)
 
